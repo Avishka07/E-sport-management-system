@@ -1,5 +1,6 @@
-from . import db
+from .. import db
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
 
 class Admin(db.Model):
     __tablename__ = 'adminuser'
@@ -31,6 +32,7 @@ class Event(db.Model):
 
     eventid = db.Column(db.Integer, primary_key=True)
     gamename = db.Column(db.String(255), nullable=False)
+    game_names = db.Column(JSONB)
     country = db.Column(db.String(100), nullable=False)
     organizer = db.Column(db.String(100), nullable=False)
     adminid = db.Column(db.Integer, db.ForeignKey('adminuser.adminid'), nullable=False)
@@ -40,6 +42,7 @@ class Event(db.Model):
     starting_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     registration_closing = db.Column(db.DateTime, nullable=False)
+    image_path = db.Column(db.String(255))
 
 class EventRegistration(db.Model):
     __tablename__ = 'event_registration'
@@ -48,4 +51,9 @@ class EventRegistration(db.Model):
     EventID = db.Column(db.Integer, db.ForeignKey('events.eventid'), nullable=False)
     UserID = db.Column(db.Integer, db.ForeignKey('player.userid'), nullable=True)
     TeamID = db.Column(db.Integer, db.ForeignKey('team.teamid'), nullable=True)
-    RegistrationDate = db.Column(db.DateTime, default=datetime.utcnow)
+    RegisteredDate = db.Column(db.DateTime, default=datetime.utcnow)
+
+    Country = db.Column(db.String(100), nullable=True)
+    PhoneNumber = db.Column(db.String(20), nullable=True)
+    DateOfBirth = db.Column(db.Date, nullable=True)
+    Gender = db.Column(db.String(10), nullable=True)

@@ -1,1 +1,0 @@
-# E-sport-management-system

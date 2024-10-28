@@ -1,18 +1,23 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..utils.db import db
-from ..models import Player, Team 
+from ..models.sql_models import Player, Team 
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_cors import cross_origin
+import requests
 
 user_blueprint = Blueprint('user', __name__)
 
+# @user_blueprint.route('/signup', methods=['POST', 'OPTIONS'])
 @user_blueprint.route('/signup', methods=['POST'])
+
+# @cross_origin(origin='*')
 def signup_user():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
     nickname = data.get('nickname')
-    country = data.get('country')
+    country = data.get('country', None)
     teamid = data.get('teamid', None)
 
     if not email or not password:
@@ -33,8 +38,34 @@ def signup_user():
     
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message': 'User created successfully'}), 201
 
+    # Now call the Neo4j API to create the player in Neo4j using the new player's ID
+    neo4j_url = f"http://127.0.0.1:5000/recommendation/addplayer?player_id={new_user.userid}"
+    response = requests.post(neo4j_url)
+    print(response)
+    try:
+        
+        if response.status_code != 201:
+            # Handle the case where the Neo4j API returns an error
+            return jsonify({'message': f'Error creating player in Neo4j: {response.text}'}), response.status_code
+    except requests.exceptions.RequestException as e:
+        # Catch any errors that occur during the request to the Neo4j API
+        return jsonify({'message': f'Failed to communicate with Neo4j API: {str(e)}'}), 500
+
+
+    # Auto-login: generate access and refresh tokens
+    additional_claims = {'role': 'user'}
+    access_token = create_access_token(identity=new_user.userid, additional_claims=additional_claims)
+    refresh_token = create_refresh_token(identity=new_user.userid, additional_claims=additional_claims)
+
+    # Return the tokens along with the success message
+    return jsonify({
+        'message': 'User created successfully',
+        'access_token': access_token,
+        'refresh_token': refresh_token,
+        'user_id': new_user.userid,
+        'username': new_user.nickname
+    }), 201
 
 @user_blueprint.route('/login', methods=['POST'])
 def login_user():
@@ -51,7 +82,13 @@ def login_user():
         additional_claims = {'role': 'user'}
         access_token = create_access_token(identity=user.userid, additional_claims=additional_claims)
         refresh_token = create_refresh_token(identity=user.userid, additional_claims=additional_claims)
-        return jsonify({'message': 'Login successful', 'user_id': user.userid, 'access_token': access_token, 'refresh_token': refresh_token}), 200
+        return jsonify({
+            'message': 'Login successful', 
+            'user_id': user.userid,
+            'username': user.nickname, 
+            'access_token': access_token, 
+            'refresh_token': refresh_token
+            }), 200
     else:
         return jsonify({'message': 'Invalid username or password'}), 401
 

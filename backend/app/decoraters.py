@@ -1,6 +1,6 @@
 from functools import wraps
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, get_jwt
-from .models import Admin, Player
+from .models.sql_models import Admin, Player
 from flask import jsonify
 
 def admin_required(fn):

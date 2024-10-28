@@ -1,0 +1,100 @@
+# version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend  # This is the path to your frontend folder
+      dockerfile: Dockerfile  # Default name is Dockerfile; you can omit this line
+    container_name: arenasync_frontend
+    ports:
+      - "3000:3000"  # Expose the frontend on port 3000
+    depends_on:
+      - backend  # Ensure backend is running before frontend starts
+    volumes:
+      - ./frontend:/usr/src/app  # Mount source code for live development (optional)
+    restart: always
+
+  backend:
+    build:
+      context: ./backend  # This is the path to your backend folder
+      dockerfile: Dockerfile  # Default name is Dockerfile; you can omit this line
+    container_name: arenasync_backend
+    ports:
+      - "5002:5000"  # Expose the backend on port 5002 internally, but bind to 5002 on host
+    environment:
+      DATABASE_NAME: arenasync
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_HOST: postgres
+      NEO4J_URI: neo4j:7687  # Ensure it uses 'bolt://' for Neo4j connection
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ArenaSync
+      NEO4J_DATABASE: neo4j  # Specify the Neo4j database
+    depends_on:
+      - postgres
+      - neo4j
+    volumes:
+      - ./backend:/app  # Mount the backend directory
+    restart: always
+
+
+  # postgres:
+  #   image: postgres:13
+  #   container_name: postgres_db
+  #   environment:
+  #     POSTGRES_DB: arenasync
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: 26918
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+  #     - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+  #   ports:
+  #     - "5433:5432"
+  #   restart: always
+
+  postgres:
+    container_name: container_db
+    image: postgres
+    # hostname: localhost
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: arenasync
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+
+  pgadmin:
+    container_name: container-pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    restart: unless-stopped
+
+      
+
+  neo4j:
+    image: neo4j:4.4
+    container_name: neo4j_db
+    environment:
+      NEO4J_AUTH: neo4j/ArenaSync
+    volumes:
+      - neo4j_data:/data
+    ports:
+      - "7474:7474"  # Neo4j browser interface
+      - "7687:7687"  # Bolt protocol for database connection
+    restart: always
+
+volumes:
+  postgres-data:
+  neo4j_data:

@@ -102,4 +102,4 @@ def get_alll_games():
 
 if __name__ == "__main__":
     print("Starting Python Flask Server for ArenaSync")
-    app.run(port=5001)
+    app.run(port=5002)

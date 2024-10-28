@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* slick slider core styles */
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Hide the default checkbox */
+.custom-checkbox {
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+/* Create a custom checkbox */
+.custom-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding-left: 35px;
+  user-select: none;
+}
+
+/* Style for the custom checkbox */
+.custom-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 23px;
+  height: 23px;
+  border: 2px solid #555555;
+  border-radius: 4px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+/* Add a checkmark when checked */
+.custom-checkbox:checked + .custom-label::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 48%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-width: 0 3px 3px 0;
+}
+
+/* Checkbox checked state */
+.custom-checkbox:checked + .custom-label::before {
+  background-color: #3b82f6;
+  border-color: white;
+}
+
+.custom-checkbox-form:checked + .custom-label::before {
+  border-color: #555555;
+}
+
+/* Hide the default radio button */
+.custom-radio {
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+/* Create a custom radio button */
+.custom-radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding-left: 35px;
+  user-select: none;
+}
+
+/* Style for the custom radio button */
+.custom-radio-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 23px;
+  height: 23px;
+  border: 2px solid #555555;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+/* Add an inner dot when selected */
+.custom-radio:checked + .custom-radio-label::after {
+  content: "";
+  position: absolute;
+  left: 6.5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: white;
+}
+
+/* Radio button checked state */
+.custom-radio:checked + .custom-radio-label::before {
+  background-color: #3b82f6;
+  border-color: white;
+}
+
+.custom-radio-label:checked + .custom-radio-label::before {
+  border-color: #555555;
+}
